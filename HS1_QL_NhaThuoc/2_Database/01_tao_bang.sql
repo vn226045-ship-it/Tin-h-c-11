@@ -1,0 +1,94 @@
+-- QL_NhaThuoc: tao co so du lieu (MySQL 8 / MariaDB)
+-- Ten khong dau, khong khoang trang; kieu FK trung kieu PK.
+DROP DATABASE IF EXISTS QL_NhaThuoc;
+CREATE DATABASE QL_NhaThuoc CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE QL_NhaThuoc;
+
+-- Thanh vien 1: Nguyen Viet Hung
+CREATE TABLE NhomThuoc (
+  MaNhom VARCHAR(10) PRIMARY KEY,
+  TenNhom VARCHAR(50) NOT NULL,
+  MoTa VARCHAR(100)
+);
+CREATE TABLE Thuoc (
+  MaThuoc VARCHAR(10) PRIMARY KEY,
+  TenThuoc VARCHAR(100) NOT NULL,
+  HoatChat VARCHAR(100),
+  DonViTinh VARCHAR(20),
+  GiaBan DECIMAL(12,0) NOT NULL CHECK (GiaBan >= 0),
+  MaNhom VARCHAR(10) NOT NULL,
+  NhaSanXuat VARCHAR(100),
+  FOREIGN KEY (MaNhom) REFERENCES NhomThuoc(MaNhom)
+);
+CREATE TABLE LoThuoc (
+  MaLo VARCHAR(10) PRIMARY KEY,
+  MaThuoc VARCHAR(10) NOT NULL,
+  SoLo VARCHAR(30) NOT NULL,
+  NgaySanXuat DATE,
+  HanDung DATE NOT NULL,
+  SoLuongTon INT NOT NULL DEFAULT 0 CHECK (SoLuongTon >= 0),
+  FOREIGN KEY (MaThuoc) REFERENCES Thuoc(MaThuoc)
+);
+
+-- Thanh vien 3 (NhanVien duoc PhieuNhap dung nen tao truoc)
+CREATE TABLE KhachHang (
+  MaKH VARCHAR(10) PRIMARY KEY,
+  HoTen VARCHAR(50) NOT NULL,
+  DienThoai VARCHAR(15),
+  DiaChi VARCHAR(150)
+);
+CREATE TABLE NhanVien (
+  MaNV VARCHAR(10) PRIMARY KEY,
+  HoTen VARCHAR(50) NOT NULL,
+  CCCD CHAR(12) UNIQUE,
+  NgaySinh DATE,
+  GioiTinh VARCHAR(5),
+  ChucVu VARCHAR(30)
+);
+
+-- Thanh vien 2: Nhu Dinh Thi
+CREATE TABLE NhaCungCap (
+  MaNCC VARCHAR(10) PRIMARY KEY,
+  TenNCC VARCHAR(100) NOT NULL,
+  DienThoai VARCHAR(15),
+  DiaChi VARCHAR(150),
+  CongNo DECIMAL(12,0) NOT NULL DEFAULT 0
+);
+CREATE TABLE PhieuNhap (
+  MaPhieuNhap VARCHAR(10) PRIMARY KEY,
+  NgayNhap DATE NOT NULL,
+  MaNCC VARCHAR(10) NOT NULL,
+  MaNV VARCHAR(10) NOT NULL,
+  TongTien DECIMAL(12,0) NOT NULL DEFAULT 0,
+  FOREIGN KEY (MaNCC) REFERENCES NhaCungCap(MaNCC),
+  FOREIGN KEY (MaNV) REFERENCES NhanVien(MaNV)
+);
+CREATE TABLE CT_PhieuNhap (
+  MaPhieuNhap VARCHAR(10),
+  MaLo VARCHAR(10),
+  SoLuong INT NOT NULL CHECK (SoLuong > 0),
+  GiaNhap DECIMAL(12,0) NOT NULL,
+  PRIMARY KEY (MaPhieuNhap, MaLo),
+  FOREIGN KEY (MaPhieuNhap) REFERENCES PhieuNhap(MaPhieuNhap),
+  FOREIGN KEY (MaLo) REFERENCES LoThuoc(MaLo)
+);
+
+-- Thanh vien 3: Ho Huu Nguyen Anh
+CREATE TABLE HoaDon (
+  MaHD VARCHAR(10) PRIMARY KEY,
+  NgayBan DATE NOT NULL,
+  MaKH VARCHAR(10),
+  MaNV VARCHAR(10) NOT NULL,
+  TongTien DECIMAL(12,0) NOT NULL DEFAULT 0,
+  FOREIGN KEY (MaKH) REFERENCES KhachHang(MaKH),
+  FOREIGN KEY (MaNV) REFERENCES NhanVien(MaNV)
+);
+CREATE TABLE CT_HoaDon (
+  MaHD VARCHAR(10),
+  MaLo VARCHAR(10),
+  SoLuong INT NOT NULL CHECK (SoLuong > 0),
+  DonGia DECIMAL(12,0) NOT NULL,
+  PRIMARY KEY (MaHD, MaLo),
+  FOREIGN KEY (MaHD) REFERENCES HoaDon(MaHD),
+  FOREIGN KEY (MaLo) REFERENCES LoThuoc(MaLo)
+);
